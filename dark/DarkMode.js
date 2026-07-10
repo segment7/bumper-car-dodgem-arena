@@ -1,5 +1,5 @@
 // Dark Mode extension: while active only the player is drawn, and each
-// opponent is located by its spatial engine hum instead.
+// opponent is located by its spatial engine hum.
 class DarkMode {
   constructor() {
     this.active = false;

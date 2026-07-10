@@ -1,5 +1,4 @@
-// The single global-hook class: wires the matter.js world, managers and
-// input together, and owns rendering.
+// The single global-hook class: wires the matter.js world, managers and input together, and owns rendering.
 class Arena {
   constructor() {
     this.engine = Matter.Engine.create();
@@ -113,6 +112,7 @@ class Arena {
 
   drawDark() {
     background(0);
+    this.drawBarrier();
     if (this.player) this.player.draw();
     this.animations.draw();
     this.drawDarkHud();

@@ -1,5 +1,4 @@
-// Colour-invert flash at a barrier contact point, masked to the barrier's
-// own colour so nearby floor/car pixels are untouched.
+// Colour-invert flash at a barrier contact point
 class BarrierPulse extends Effect {
   constructor(pos) {
     super(pos, BARRIER_PULSE_LIFESPAN_MS);

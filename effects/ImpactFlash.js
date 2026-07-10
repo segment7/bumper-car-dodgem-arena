@@ -1,4 +1,4 @@
-// Brief spark ring rendered at a car-car collision contact point.
+// Brief spark rendered at a car-car collision contact point.
 class ImpactFlash extends Effect {
   constructor(pos) {
     super(pos, IMPACT_FLASH_LIFESPAN_MS);

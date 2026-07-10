@@ -1,5 +1,4 @@
-// Base car: owns the matter.js body plus its Motion, Knockback, injected
-// controller and MotionTrail.
+// Base car: owns the matter.js body plus its Motion, Knockback, injected controller and MotionTrail.
 class Car {
   constructor(x, y, angle, spec, sprite, controller, isPlayer) {
     this.spec = spec;

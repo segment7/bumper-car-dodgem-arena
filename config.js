@@ -27,14 +27,14 @@ const SLOW_SPEC = {
   friction: 0.3,
   frictionAir: 0.05,
   restitution: 0.2,
-  throttleForce: 0.0015,
+  throttleForce: 0.0025,
   maxForwardSpeed: 3,
   maxReverseSpeed: 2.5,
-  turnRate: 0.052
+  turnRate: 0.077
 };
 
 const BARRIER_RESTITUTION = 0.8;
-const BARRIER_FRICTION = 0.8;
+const BARRIER_FRICTION = 0.7;
 const BARRIER_COLOR = 50;
 
 // Sprite art faces down; rotate so angle 0 (local +x) is the car's front.
@@ -48,7 +48,7 @@ const BARRIER_PULSE_LIFESPAN_MS = 300;
 const BARRIER_PULSE_MAX_RADIUS = 25;
 
 const HEARING_RADIUS = 500;
-const OPPONENT_ENGINE_FREQ = 250;
+const OPPONENT_ENGINE_FREQ = 200;
 const ENGINE_FREQ_NEAR_MULT = 2.5;
 
 const MODE = {

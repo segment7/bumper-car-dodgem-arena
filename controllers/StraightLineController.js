@@ -1,4 +1,4 @@
-// Mode 2: steers toward a constant heading while throttling forward.
+// Mode 2: steers toward a constant heading
 class StraightLineController {
   constructor(headingAngle) {
     this.headingAngle = headingAngle;

@@ -1,4 +1,5 @@
-// Brief post-collision pause of the car's controller/trail.
+// Extension - Brief post-collision pause of the car's controller/trail. 
+// I designed this to strengthen real-world simulation.
 class Knockback {
   constructor() {
     this.active = false;

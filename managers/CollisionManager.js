@@ -1,5 +1,4 @@
-// Routes matter.js collision events to the cars involved and spawns the
-// matching visual effect.
+// Routes matter.js collision events to the cars involved and spawns the matching visual effect.
 class CollisionManager {
   constructor(engine, animations) {
     this.engine = engine;

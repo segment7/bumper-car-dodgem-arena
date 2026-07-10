@@ -1,4 +1,4 @@
-// Mode 3: steers toward a heading that oscillates around a base angle.
+// Mode 3: steers toward a heading that oscillates around a base angle
 class SineWaveController {
   constructor(headingAngle) {
     this.baseAngle = headingAngle;

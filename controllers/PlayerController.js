@@ -14,6 +14,4 @@ class PlayerController {
 
     return { throttle, steer };
   }
-
-  // No reverseHeading()/randomTurn(): the player is never force-turned.
 }

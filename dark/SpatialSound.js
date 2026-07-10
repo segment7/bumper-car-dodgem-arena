@@ -1,4 +1,4 @@
-// Dark Mode engine hum: volume, pan and pitch all track the player's position.
+// Dark Mode engine: volume, pan and pitch all track the player's position.
 class SpatialSound {
   constructor(freq) {
     this.baseFreq = freq;
@@ -17,12 +17,12 @@ class SpatialSound {
 
   updateRelativeTo(listenerPos, sourcePos) {
     const d = dist(listenerPos.x, listenerPos.y, sourcePos.x, sourcePos.y);
-    const vol = map(d, 0, HEARING_RADIUS, 0.7, 0, true);
+    const vol = map(d, 0, HEARING_RADIUS, 0.3, 0, true);
     const pan = constrain(map(sourcePos.x - listenerPos.x, -HEARING_RADIUS, HEARING_RADIUS, -1, 1), -1, 1);
     const freq = map(d, 0, HEARING_RADIUS, this.baseFreq * ENGINE_FREQ_NEAR_MULT, this.baseFreq, true);
-    this.osc.amp(vol, 0.05);
+    this.osc.amp(vol, 0.02);
     this.osc.pan(pan);
-    this.osc.freq(freq, 0.05);
+    this.osc.freq(freq, 0.9);
   }
 
   stop() {
