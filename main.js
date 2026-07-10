@@ -11,7 +11,7 @@ applies a force along the car's heading every frame, and a separate clamp
 keeps each car under its own top speed. Barriers have high restitution so
 they feel like a hard wall.
 
-2. Opponent logic in modes 2 and 3. Each opponent car is driven by a small
+2. Opponent logic. Each opponent car is driven by a small
 controller object. StraightLineController steers toward one fixed heading,
 and SineWaveController steers toward a heading that swings over time. Both
 hand their intent to the same Motion system the player uses, so an opponent
