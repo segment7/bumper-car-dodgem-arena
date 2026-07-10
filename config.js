@@ -40,6 +40,9 @@ const BARRIER_COLOR = 50;
 // Sprite art faces down; rotate so angle 0 (local +x) is the car's front.
 const SPRITE_ANGLE_OFFSET = -Math.PI / 2;
 
+// Rounds the hitbox corners so they better match the car art.
+const CAR_HITBOX_CHAMFER = 25;
+
 const KNOCKBACK_PAUSE_MS = 350;
 
 const TRAIL_MAX_POINTS = 18;

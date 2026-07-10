@@ -11,12 +11,15 @@ class Car {
     this.width = sprite.width * scale;
     this.height = sprite.height * scale;
 
-    this.body = Matter.Bodies.rectangle(x, y, this.width, this.height, {
+    // Sprite length runs along its y axis, but the body's front is local +x,
+    // so the hitbox takes height along x and width along y.
+    this.body = Matter.Bodies.rectangle(x, y, this.height, this.width, {
       angle,
       mass: spec.mass,
       friction: spec.friction,
       frictionAir: spec.frictionAir,
-      restitution: spec.restitution
+      restitution: spec.restitution,
+      chamfer: { radius: CAR_HITBOX_CHAMFER }
     });
     this.body.owner = this;
 
