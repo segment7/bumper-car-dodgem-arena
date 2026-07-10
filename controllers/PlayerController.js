@@ -15,7 +15,5 @@ class PlayerController {
     return { throttle, steer };
   }
 
-  // Intentionally no reverseHeading()/randomTurn(): the player is never
-  // force-turned by the collision policy, only Car's physical knockback
-  // (velocity nudge) applies, then the player keeps manual control.
+  // No reverseHeading()/randomTurn(): the player is never force-turned.
 }

@@ -1,6 +1,4 @@
-// Continuous per-car fading trail, scaled by speed. Owned by a Car (not a
-// one-shot Effect: it's a rolling history, not a fire-and-forget animation),
-// and pausable during a Knockback so it doesn't render during the slide.
+// Per-car fading trail, scaled by speed and paused during knockback.
 class MotionTrail {
   constructor(car) {
     this.car = car;

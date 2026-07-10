@@ -1,6 +1,4 @@
-// Brief post-collision state: adds an extra axial velocity nudge (matter.js's
-// own restitution/mass already handles the base separation), then suspends
-// the car's controller/trail for a short window before handing back control.
+// Brief post-collision pause of the car's controller/trail.
 class Knockback {
   constructor() {
     this.active = false;
@@ -8,13 +6,7 @@ class Knockback {
     this.onComplete = null;
   }
 
-  trigger(body, normal, isAxial, onComplete) {
-    if (isAxial) {
-      Matter.Body.setVelocity(body, {
-        x: body.velocity.x + normal.x * AXIAL_BOOST,
-        y: body.velocity.y + normal.y * AXIAL_BOOST
-      });
-    }
+  trigger(onComplete) {
     this.active = true;
     this.timer = 0;
     this.onComplete = onComplete;

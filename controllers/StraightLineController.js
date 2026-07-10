@@ -1,25 +1,25 @@
-// Mode 2: holds a constant heading/speed (kinematically driven each frame),
-// only overridden while the car's Knockback is active.
+// Mode 2: steers toward a constant heading while throttling forward.
 class StraightLineController {
-  constructor(headingAngle, speed) {
+  constructor(headingAngle) {
     this.headingAngle = headingAngle;
-    this.speed = speed;
   }
 
   getIntent(car) {
-    Matter.Body.setAngle(car.body, this.headingAngle);
-    Matter.Body.setVelocity(car.body, {
-      x: Math.cos(this.headingAngle) * this.speed,
-      y: Math.sin(this.headingAngle) * this.speed
-    });
-    return { throttle: 0, steer: 0 };
+    const diff = Math.atan2(
+      Math.sin(this.headingAngle - car.body.angle),
+      Math.cos(this.headingAngle - car.body.angle)
+    );
+    const steer = Math.abs(diff) < 0.05 ? 0 : (diff > 0 ? 1 : -1);
+    return { throttle: 1, steer };
   }
 
   reverseHeading() {
-    this.headingAngle += PI;
+    this.headingAngle += Math.PI;
   }
 
   randomTurn() {
-    this.headingAngle += (Math.random() < 0.5 ? 1 : -1) * HALF_PI;
+    const delta = (Math.random() < 0.5 ? 1 : -1) * HALF_PI;
+    this.headingAngle += delta;
+    return delta;
   }
 }

@@ -1,29 +1,29 @@
-// Mode 3: oscillates heading around a base angle while holding ~constant
-// speed, same override rules as StraightLineController.
+// Mode 3: steers toward a heading that oscillates around a base angle.
 class SineWaveController {
-  constructor(headingAngle, speed) {
+  constructor(headingAngle) {
     this.baseAngle = headingAngle;
-    this.speed = speed;
     this.t = 0;
   }
 
   getIntent(car) {
     this.t += deltaTime / 1000;
-    const angle = this.baseAngle + Math.sin(this.t * 2) * 0.5;
+    const targetAngle = this.baseAngle + Math.sin(this.t * 2) * 0.5;
 
-    Matter.Body.setAngle(car.body, angle);
-    Matter.Body.setVelocity(car.body, {
-      x: Math.cos(angle) * this.speed,
-      y: Math.sin(angle) * this.speed
-    });
-    return { throttle: 0, steer: 0 };
+    const diff = Math.atan2(
+      Math.sin(targetAngle - car.body.angle),
+      Math.cos(targetAngle - car.body.angle)
+    );
+    const steer = Math.abs(diff) < 0.05 ? 0 : (diff > 0 ? 1 : -1);
+    return { throttle: 1, steer };
   }
 
   reverseHeading() {
-    this.baseAngle += PI;
+    this.baseAngle += Math.PI;
   }
 
   randomTurn() {
-    this.baseAngle += (Math.random() < 0.5 ? 1 : -1) * HALF_PI;
+    const delta = (Math.random() < 0.5 ? 1 : -1) * HALF_PI;
+    this.baseAngle += delta;
+    return delta;
   }
 }

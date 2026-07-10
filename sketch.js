@@ -1,3 +1,47 @@
+/*
+COMMENTARY (≤500 words)
+
+Physics. All barriers and cars are matter.js bodies. I gave the two car
+types different mass, friction and restitution values, so collisions feel
+different depending on what is hit. The standard car is light, with a
+stronger engine force and a higher top speed. The slow car is heavier and
+accelerates slowly, and it is also pushed back less in a crash - this
+difference comes from matter.js resolving the impulse by mass, not from my
+own formula. Throttle is force-based: while a key is held, the Motion class
+applies a force along the car's heading every frame, and a separate clamp
+keeps each car under its own top speed. Barriers have high restitution so
+they feel like a hard wall rather than a cushion.
+
+Opponents (modes 2 and 3). Each opponent car is driven by a small
+controller object. StraightLineController steers toward one fixed heading,
+and SineWaveController steers toward a heading that swings over time. Both
+hand their intent to the same Motion system the player uses, so an opponent
+accelerates and tops out exactly like a player-driven car of the same spec,
+instead of moving at an artificial fixed speed. When a collision happens,
+matter.js separates the bodies, and a short Knockback state pauses the
+controller and trail so the slide stays visible. On a barrier hit the car
+turns 180 degrees on the spot and then drives away; on a car-car hit it
+turns 90 degrees left or right at random. The player car is never
+force-turned - it only bounces.
+
+Animations. MotionTrail is a fading point history behind each car, scaled
+by speed and paused during knockback. ImpactFlash draws a spark sprite at
+the car-car contact point. BarrierPulse inverts the barrier's own pixels in
+a small area around the contact point, masked by colour so floor and car
+pixels nearby are not affected. The floor is tiled with a small wood
+texture repeated across the arena instead of one stretched image.
+
+Extension - Dark Mode (key v, independent of modes 1-3). The screen turns
+black and only the player's sprite is drawn; opponents are hidden, although
+an ImpactFlash still fires when the player is hit, as a fair-play cue.
+Every opponent carries a SpatialSound emitter. Its volume falls off with
+distance to the player, its stereo pan follows the left/right position, and
+its pitch rises as the player gets closer, so a higher hum is a clear
+warning that a hidden car is near. In this way the player must locate
+opponents by ear instead of sight. I chose this perception-based mechanic
+(real-time spatial audio plus selective rendering) because it has no timer
+or score, so it avoids the easy scoring extension that the brief excludes.
+*/
 let arena;
 
 function preload() {
@@ -25,49 +69,3 @@ function keyReleased() {
 function mousePressed() {
   arena.handleMousePressed(mouseX, mouseY);
 }
-
-/*
-COMMENTARY (draft, ≤500 words — will be refined as remaining features land)
-
-Physics: barriers and cars are matter.js bodies with deliberately different
-restitution/friction/mass so collisions look and feel different depending on
-what's hit. Standard cars are lighter with more throttle force and a higher
-top speed; Slow cars are heavier, weaker-engined, and grippier (more
-friction), so the same throttle force produces visibly sluggish acceleration
-and they get displaced less in a collision - that displacement difference is
-matter.js's own inverse-mass impulse resolution, not a hand-rolled formula.
-Throttle is force-based (Motion class applies a force along the body's
-heading each frame while held); a max forward/reverse speed is enforced
-separately by clamping velocity magnitude after the physics step.
-
-Opponent logic (modes 2/3): each opponent is driven by a small controller
-object (StraightLineController / SineWaveController) that kinematically sets
-the body's angle/velocity every frame to hold a constant heading (mode 2) or
-an oscillating heading at roughly constant speed (mode 3) - this keeps their
-paths readable rather than physics-drifting. On collision, a brief
-Knockback state takes over: matter.js's own restitution/mass separates the
-cars; if the hit lands within 15 degrees of a car's front/rear axis an extra
-velocity nudge is added along the collision normal so head-on/rear hits
-travel further than glancing ones. During that short window the
-controller/trail are suspended so the physics-driven slide is visible; once
-it ends, opponents turn 90 degrees in a random direction and resume their
-path, while the player is never force-turned and simply regains manual
-control.
-
-Animations: MotionTrail is a per-car fading point history scaled by speed,
-paused during a knockback so it doesn't smear through the slide. ImpactFlash
-draws the spark sprite at the car-car contact point. BarrierPulse reuses a
-pixel-invert technique (loadPixels/updatePixels) but scoped to a small
-region around the barrier contact point rather than the full canvas, giving
-a cheap localised colour-shift ripple.
-
-Extension - Dark Mode: toggled independently of modes 1-3 (key v), it
-switches rendering to a black canvas showing only the player's own sprite -
-opponents and their trail/pulse are hidden, though an ImpactFlash still
-fires on player impact as a fair-play cue. Each opponent carries a
-SpatialSound emitter (p5.sound Oscillator) whose volume falls off with
-distance to the player and whose stereo pan follows relative left/right
-position, so the player has to locate opponents by ear instead of by sight.
-This is a genuine perception-based mechanic (real-time spatial audio +
-selective rendering), not a scoring bolt-on.
-*/

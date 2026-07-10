@@ -5,4 +5,5 @@ function loadGameAssets() {
   sprites.slow = loadImage('assets/slowCar.png');
   sprites.player = loadImage('assets/playerCar.png');
   sprites.spark = loadImage('assets/spark.png');
+  sprites.woodTexture = loadImage('assets/WoodTexture.png');
 }

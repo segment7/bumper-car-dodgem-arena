@@ -1,11 +1,11 @@
 const ARENA_W = 1400;
 const ARENA_H = 700;
-const BARRIER_THICKNESS = 40;
+const BARRIER_THICKNESS = 20;
 
 var carNumbers = 4;
 
 const START_ZONE = {
-  x: BARRIER_THICKNESS,
+  x: BARRIER_THICKNESS+2,
   y: BARRIER_THICKNESS,
   w: 180,
   h: ARENA_H - BARRIER_THICKNESS * 2
@@ -13,45 +13,45 @@ const START_ZONE = {
 
 const STANDARD_SPEC = {
   mass: 1,
-  friction: 0.05,
-  frictionAir: 0.03,
-  restitution: 0.5,
-  throttleForce: 0.012,
-  maxForwardSpeed: 9,
-  maxReverseSpeed: 4,
-  turnRate: 0.045
+  friction: 0.3,
+  frictionAir: 0.05,
+  restitution: 0.4,
+  throttleForce: 0.003,
+  maxForwardSpeed: 4,
+  maxReverseSpeed: 3.5,
+  turnRate: 0.077
 };
 
 const SLOW_SPEC = {
-  mass: 1.8,
-  friction: 0.12,
+  mass: 4,
+  friction: 0.3,
   frictionAir: 0.05,
-  restitution: 0.35,
-  throttleForce: 0.007,
-  maxForwardSpeed: 5,
+  restitution: 0.2,
+  throttleForce: 0.0015,
+  maxForwardSpeed: 3,
   maxReverseSpeed: 2.5,
-  turnRate: 0.032
+  turnRate: 0.052
 };
 
-const BARRIER_RESTITUTION = 0.7;
-const BARRIER_FRICTION = 0.1;
+const BARRIER_RESTITUTION = 0.8;
+const BARRIER_FRICTION = 0.8;
+const BARRIER_COLOR = 50;
 
-// Sprite art draws the car's front facing down; this offset rotates it so
-// angle 0 (our "forward" convention, local +x) visually faces forward.
+// Sprite art faces down; rotate so angle 0 (local +x) is the car's front.
 const SPRITE_ANGLE_OFFSET = -Math.PI / 2;
 
-const AXIAL_ANGLE_THRESHOLD = 15;
-const AXIAL_BOOST = 4;
-const KNOCKBACK_PAUSE_MS = 200;
+const KNOCKBACK_PAUSE_MS = 350;
 
 const TRAIL_MAX_POINTS = 18;
 const IMPACT_FLASH_LIFESPAN_MS = 350;
 const BARRIER_PULSE_LIFESPAN_MS = 300;
-const BARRIER_PULSE_MAX_RADIUS = 45;
+const BARRIER_PULSE_MAX_RADIUS = 25;
 
-const HEARING_RADIUS = 700;
+const HEARING_RADIUS = 500;
+const OPPONENT_ENGINE_FREQ = 250;
+const ENGINE_FREQ_NEAR_MULT = 2.5;
 
-const MODE_CONFIGS = {
+const MODE = {
   1: { spawn: 'parked', motion: 'static' },
   2: { spawn: 'random', motion: 'straight' },
   3: { spawn: 'random', motion: 'sine' }

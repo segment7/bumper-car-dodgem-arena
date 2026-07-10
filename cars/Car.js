@@ -1,8 +1,5 @@
-// Base car: owns the matter.js Body plus its Motion (physics), Knockback
-// (post-collision response), Controller (decides intent) and MotionTrail.
-// Controller is injected, not constructed here, so Car never depends on
-// KeyManager directly (PlayerController/StraightLineController/
-// SineWaveController are interchangeable behind the same getIntent() shape).
+// Base car: owns the matter.js body plus its Motion, Knockback, injected
+// controller and MotionTrail.
 class Car {
   constructor(x, y, angle, spec, sprite, controller, isPlayer) {
     this.spec = spec;
@@ -44,18 +41,27 @@ class Car {
   }
 
   onBarrierHit() {
-    if (this.controller.reverseHeading) {
+    if (this.knockback.isActive()) return;
+    if (!this.controller.reverseHeading) return;
+    this.knockback.trigger(() => {
       this.controller.reverseHeading();
-    }
+      this.snapTurn(Math.PI);
+    });
   }
 
-  onCarHit(other, normal) {
-    const axial = isAxialHit(this.body.angle, normal);
-    this.knockback.trigger(this.body, normal, axial, () => {
+  onCarHit() {
+    if (this.knockback.isActive()) return;
+    this.knockback.trigger(() => {
       if (this.controller.randomTurn) {
-        this.controller.randomTurn();
+        this.snapTurn(this.controller.randomTurn());
       }
     });
+  }
+
+  // Rotates the body about its centre.
+  snapTurn(delta) {
+    Matter.Body.setAngle(this.body, this.body.angle + delta);
+    Matter.Body.setAngularVelocity(this.body, 0);
   }
 
   draw() {

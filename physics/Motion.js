@@ -1,5 +1,5 @@
-// Translates a controller's {throttle, steer} intent into matter.js forces
-// and enforces the car's max forward/reverse speed.
+// Turns a controller's {throttle, steer} intent into matter.js forces,
+// then clamps the car's speed.
 class Motion {
   constructor(spec) {
     this.spec = spec;

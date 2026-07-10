@@ -1,5 +1,5 @@
-// The single global-hook class: owns the matter.js world, the barrier, the
-// Start Zone, all cars, animations, input, and mode/dark-mode state.
+// The single global-hook class: wires the matter.js world, managers and
+// input together, and owns rendering.
 class Arena {
   constructor() {
     this.engine = Matter.Engine.create();
@@ -8,15 +8,19 @@ class Arena {
 
     this.keyManager = new KeyManager();
     this.animations = new AnimationManager();
+    this.modeManager = new ModeManager(this.world);
+    this.darkMode = new DarkMode();
 
-    this.cars = [];
     this.player = null;
     this.mode = 1;
-    this.darkMode = false;
 
     this.buildBarrier();
-    this.registerCollisions();
+    this.collisionManager = new CollisionManager(this.engine, this.animations);
     this.setupMode(1);
+  }
+
+  get cars() {
+    return this.player ? this.modeManager.cars.concat(this.player) : this.modeManager.cars;
   }
 
   buildBarrier() {
@@ -33,94 +37,18 @@ class Arena {
     Matter.World.add(this.world, this.barriers);
   }
 
-  registerCollisions() {
-    Matter.Events.on(this.engine, 'collisionStart', (event) => {
-      event.pairs.forEach(pair => {
-        const a = pair.bodyA;
-        const b = pair.bodyB;
-        const carA = a.owner;
-        const carB = b.owner;
-        const contact = (pair.collision.supports && pair.collision.supports[0]) || a.position;
-
-        if (carA && carB) {
-          const normal = pair.collision.normal;
-          carA.onCarHit(carB, { x: -normal.x, y: -normal.y });
-          carB.onCarHit(carA, normal);
-          this.animations.add(new ImpactFlash(contact));
-        } else if (carA && b.isBarrier) {
-          carA.onBarrierHit();
-          this.animations.add(new BarrierPulse(contact));
-        } else if (carB && a.isBarrier) {
-          carB.onBarrierHit();
-          this.animations.add(new BarrierPulse(contact));
-        }
-      });
-    });
-  }
-
   setupMode(modeNumber) {
     this.mode = modeNumber;
-    this.clearCars();
-    this.spawnOpponents(MODE_CONFIGS[modeNumber]);
+    this.modeManager.setupMode(MODE[modeNumber]);
+    if (this.player) Matter.World.remove(this.world, this.player.body);
     this.player = null;
-  }
-
-  clearCars() {
-    this.cars.forEach(car => {
-      Matter.World.remove(this.world, car.body);
-      if (car.sound) car.sound.stop();
-    });
-    this.cars = [];
-  }
-
-  spawnOpponents(config) {
-    const half = Math.floor(carNumbers / 2);
-
-    for (let i = 0; i < carNumbers; i++) {
-      const CarType = i < half ? StandardCar : SlowCar;
-      let x, y, angle;
-
-      if (config.spawn === 'parked') {
-        x = START_ZONE.x + START_ZONE.w / 2;
-        y = START_ZONE.y + (i + 1) * (START_ZONE.h / (carNumbers + 1));
-        angle = 0;
-      } else {
-        const spot = this.findFreeRandomSpot();
-        x = spot.x;
-        y = spot.y;
-        angle = Math.random() * TWO_PI;
-      }
-
-      const controller = this.makeController(config.motion, angle);
-      const car = new CarType(x, y, angle, controller, false);
-      car.sound = new SpatialSound(80 + i * 15);
-      this.cars.push(car);
-      Matter.World.add(this.world, car.body);
-    }
-  }
-
-  findFreeRandomSpot() {
-    const margin = BARRIER_THICKNESS + 40;
-    for (let attempts = 0; attempts < 60; attempts++) {
-      const x = randomRange(margin + START_ZONE.w, ARENA_W - margin);
-      const y = randomRange(margin, ARENA_H - margin);
-      const clear = this.cars.every(c => dist(x, y, c.body.position.x, c.body.position.y) > 90);
-      if (clear) return { x, y };
-    }
-    return { x: ARENA_W / 2, y: ARENA_H / 2 };
-  }
-
-  makeController(motionType, angle) {
-    if (motionType === 'straight') return new StraightLineController(angle, 3.5);
-    if (motionType === 'sine') return new SineWaveController(angle, 3);
-    return { getIntent: () => ({ throttle: 0, steer: 0 }) };
   }
 
   handleKeyPressed(keyChar) {
     userStartAudio();
     this.keyManager.handleKeyPressed(keyChar, keyCode);
 
-    if (keyChar === 'v' || keyChar === 'V') this.darkMode = !this.darkMode;
+    if (keyChar === 'v' || keyChar === 'V') this.darkMode.toggle();
 
     const requestedMode = this.keyManager.consumeModeRequest();
     if (requestedMode) this.setupMode(requestedMode);
@@ -145,7 +73,6 @@ class Arena {
 
     const controller = new PlayerController(this.keyManager);
     this.player = new StandardCar(mx, my, 0, controller, true);
-    this.cars.push(this.player);
     Matter.World.add(this.world, this.player.body);
     this.keyManager.clearSpawnArm();
   }
@@ -156,24 +83,17 @@ class Arena {
 
     this.cars.forEach(car => car.update(dt));
     this.animations.update(dt);
-
-    if (this.player) {
-      this.cars.forEach(car => {
-        if (car !== this.player && car.sound) {
-          car.sound.start();
-          car.sound.updateRelativeTo(this.player.body.position, car.body.position);
-        }
-      });
-    }
+    this.darkMode.update(this.player, this.modeManager.cars);
   }
 
   draw() {
-    if (this.darkMode) this.drawDark();
+    if (this.darkMode.active) this.drawDark();
     else this.drawNormal();
   }
 
   drawNormal() {
     background(60, 130, 60);
+    this.drawFloor();
     this.drawStartZone();
     this.drawBarrier();
     this.cars.forEach(car => car.draw());
@@ -181,15 +101,32 @@ class Arena {
     this.drawHud();
   }
 
+  drawFloor() {
+    const floorX = START_ZONE.x;
+    const tile = sprites.woodTexture;
+    for (let y = 0; y < ARENA_H; y += tile.height) {
+      for (let x = floorX; x < ARENA_W; x += tile.width) {
+        image(tile, x, y);
+      }
+    }
+  }
+
   drawDark() {
     background(0);
     if (this.player) this.player.draw();
     this.animations.draw();
-    this.drawHud();
+    this.drawDarkHud();
+  }
+
+  drawDarkHud() {
+    fill(255);
+    noStroke();
+    textSize(14);
+    text('Dark Mode  |  Press v to exit', 6, ARENA_H - 6);
   }
 
   drawBarrier() {
-    fill(80);
+    fill(BARRIER_COLOR);
     noStroke();
     this.barriers.forEach(b => {
       beginShape();
@@ -200,7 +137,7 @@ class Arena {
 
   drawStartZone() {
     noFill();
-    stroke(255, 200, 0);
+    stroke(155, 200, 100);
     strokeWeight(2);
     rect(START_ZONE.x, START_ZONE.y, START_ZONE.w, START_ZONE.h);
   }
@@ -210,8 +147,8 @@ class Arena {
     noStroke();
     textSize(14);
     text(
-      `Mode ${this.mode}  |  Dark Mode [v]: ${this.darkMode ? 'ON' : 'OFF'}  |  ${this.player ? '' : 'Press i, then click the Start Zone to spawn'}`,
-      10, ARENA_H - 10
+      `Mode ${this.mode}  |  Dark Mode [Press v]: ${this.darkMode.active ? 'ON' : 'OFF'}  |  ${this.player ? '' : 'Press i, then click the Start Zone to spawn'}`,
+      6, ARENA_H - 6
     );
   }
 }
